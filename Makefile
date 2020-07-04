@@ -11,4 +11,4 @@ BUILD_INFO=-ldflags "-X $(BUILD_INFO_IMPORT_PATH).commitSHA=$(GIT_SHA) -X $(BUIL
 
 .PYNOY: build-recommend
 build-recommend:
-	$(GOBUILD) -o $(GO_STANDARDS_BINARY_NAME) $(BUILD_INFO) ./cmd/recommend/main.go
+	$(GOBUILD) -o $(RECOMMEND_BINARY_NAME) $(BUILD_INFO) ./cmd/recommend/main.go
