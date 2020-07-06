@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/Lee-xy-z/recommend/plugin/storage"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"log"
 	"os"
 )
@@ -15,7 +17,19 @@ func main() {
 	if err != nil {
 		log.Fatalf("Cannot initialize storage factory: %v", err)
 	}
-	fmt.Println(storageFactory)
+
+	v := viper.New()
+	command := &cobra.Command{
+		Use:   "recommend",
+		Short: "Recommend consumes from Kafka and writes to storage.",
+		Long:  `Recommend consumes events from a particular Kafka topic and writes them handled to a configured storage.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			storageFactory.InitFromViper(v)
+
+			return nil
+		},
+	}
+	fmt.Println(command)
 
 	/*command := &cobra.Command{
 		Use:   "recommend",

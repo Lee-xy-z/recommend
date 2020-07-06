@@ -5,13 +5,18 @@
 package es
 
 import (
+	"flag"
 	"github.com/Lee-xy-z/recommend/pkg/es"
 	"github.com/Lee-xy-z/recommend/pkg/es/config"
 	"github.com/Lee-xy-z/recommend/storage/rcdstore"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
-const primaryNamespace = "es"
+const (
+	primaryNamespace = "es"
+	archiveNamespace = "es-archive"
+)
 
 // Factory implements storage.Factory for Elasticsearch backend.
 type Factory struct {
@@ -25,7 +30,7 @@ type Factory struct {
 // NewFactory creates a new Factory
 func NewFactory() *Factory {
 	return &Factory{
-		Options: NewOptions(primaryNamespace),
+		Options: NewOptions(primaryNamespace, archiveNamespace),
 	}
 }
 
@@ -36,4 +41,15 @@ func (f *Factory) CreateRcdWriter() (rcdstore.Writer, error) {
 
 func createRcdWriter(logger *zap.Logger, client es.Client, cfg config.ClientBuilder, archive bool) (rcdstore.Writer, error) {
 	return nil, nil
+}
+
+// AddFlags implements plugin.Configurable
+func (f *Factory) AddFlags(flagSet *flag.FlagSet) {
+	f.Options.AddFlags(flagSet)
+}
+
+// InitFromViper implements plugin.Configurable
+func (f *Factory) InitFromViper(v *viper.Viper) {
+	f.Options.InitFromViper(v)
+
 }

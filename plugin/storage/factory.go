@@ -5,9 +5,15 @@
 package storage
 
 import (
+	"flag"
+	"fmt"
+	"github.com/Lee-xy-z/recommend/plugin"
 	"github.com/Lee-xy-z/recommend/plugin/storage/es"
+	"github.com/Lee-xy-z/recommend/plugin/storage/kafka"
+	"github.com/Lee-xy-z/recommend/plugin/storage/memory"
 	"github.com/Lee-xy-z/recommend/storage"
 	"github.com/Lee-xy-z/recommend/storage/rcdstore"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -15,6 +21,9 @@ const (
 	memoryStorageType        = "memory"
 	kafkaStorageType         = "kafka"
 )
+
+// AllStorageTypes defines all available storage backends
+var AllStorageTypes = []string{elasticsearchStorageType, memoryStorageType, kafkaStorageType}
 
 // Factory implements storage.Factory interface as a meta-factory for storage components.
 type Factory struct {
@@ -48,8 +57,6 @@ func NewFactory(config FactoryConfig) (*Factory, error) {
 
 // CreateRcdWriter implements storage.Factory
 func (f *Factory) CreateRcdWriter() (rcdstore.Writer, error) {
-	//var writers []rcdstore.Writer
-
 	return nil, nil
 }
 
@@ -57,6 +64,26 @@ func (f *Factory) getFactoryOfType(factoryType string) (storage.Factory, error) 
 	switch factoryType {
 	case elasticsearchStorageType:
 		return es.NewFactory(), nil
+	case memoryStorageType:
+		return memory.NewFactory(), nil
+	case kafkaStorageType:
+		return kafka.NewFactory(), nil
+	default:
+		return nil, fmt.Errorf("unknown storage type %s. Valid types are %v", factoryType, AllStorageTypes)
 	}
-	return nil, nil
+
+}
+
+// AddFlags implements plugin.Configurable
+func (f *Factory) AddFlags(flagSet *flag.FlagSet) {
+
+}
+
+// InitFromViper implements plugin.Configurable
+func (f *Factory) InitFromViper(v *viper.Viper) {
+	for _, factory := range f.factories {
+		if conf, ok := factory.(plugin.Configurable); ok {
+			conf.InitFromViper(v)
+		}
+	}
 }
